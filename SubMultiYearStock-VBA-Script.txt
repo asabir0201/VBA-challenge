@@ -1,0 +1,153 @@
+Sub MultiYearStock()
+
+For Each ws In Worksheets
+Dim WorksheetName As String
+
+'Get the WorksheetName
+WorksheetName = ws.Name
+
+Dim Ticker As String
+Dim Yearly_Change As Double
+Dim Percent_Change As Double
+Dim Total_Stock_volume As Double
+Dim GreatPerIncrease As Double
+Dim GreatPerDecrease As Double
+Dim GreatTotVolume As Double
+
+ws.Cells(1, 9).Value = "Ticker"
+ws.Cells(1, 10).Value = "Yearly Change"
+ws.Cells(1, 11).Value = "Percent Change"
+ws.Cells(1, 12).Value = "Total Stock Volume"
+ws.Cells(1, 16).Value = "Ticker"
+ws.Cells(1, 17).Value = "Value"
+ws.Cells(2, 15).Value = "Greatest % Increase"
+ws.Cells(3, 15).Value = "Greatest % Decrease"
+ws.Cells(4, 15).Value = "Greatest Total Volume"
+
+'Track rows in summary'
+Dim Track As Integer
+Track = 2
+
+'Reset variables'
+Yearly_Change = 0
+Percent_Change = 0
+Total_Stock_volume = 0
+
+'Count the nnumber of rows col:1'
+LastRow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+
+'Set Ticker to first Row'
+j = 2
+
+For i = 2 To LastRow
+
+  If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+     
+          'Add Ticker'
+           Ticker = ws.Cells(i, 1).Value
+         
+          'Move value to Summary columns'
+           ws.Range("I" & Track).Value = Ticker
+            
+          
+          'Calculate Yearly Change'
+           Yearly_Change = ws.Cells(i, 6).Value - ws.Cells(j, 3).Value
+          
+          'Move value to summary columns'
+           ws.Range("J" & Track).Value = Yearly_Change
+            
+           
+          'Conditional formating'
+           If ws.Cells(Track, 10).Value < 0 Then
+            'Set cell background color to red'
+             ws.Cells(Track, 10).Interior.ColorIndex = 3
+               
+           Else
+                
+            'Set cell background color to green'
+             ws.Cells(Track, 10).Interior.ColorIndex = 4
+                
+           End If
+                     
+                      
+          'Calculate Percent Change'
+           If ws.Cells(j, 3).Value <> 0 Then
+              Percent_Change = (ws.Cells(i, 6).Value - ws.Cells(j, 3).Value) / ws.Cells(j, 3).Value
+              
+              'Move Percent Change to summary & Formatting'
+              ws.Range("k" & Track).Value = Format(Percent_Change, "Percent")
+                          
+           End If
+           
+           
+           'Calculate Total Stock Volume'
+            Total_Stock_volume = Total_Stock_volume + ws.Cells(i, 7).Value
+           
+           'Move volume to summary'
+            ws.Range("l" & Track).Value = Total_Stock_volume
+        
+            
+           'Next row in summary
+            Track = Track + 1
+           
+           'New start ticker'
+            j = i + 1
+            
+           'Reset Total Stock Volume'
+            Total_Stock_volume = 0
+                
+   Else
+            'Calculate Total Stock Volume'
+            Total_Stock_volume = Total_Stock_volume + ws.Cells(i, 7).Value
+            
+            'Move volume to summary'
+             ws.Range("l" & Track).Value = Total_Stock_volume
+   
+ End If
+
+Next i
+
+'Count the number of rows col:9'
+ LastRowI = ws.Cells(Rows.Count, 9).End(xlUp).Row
+
+ GreatPerIncrease = ws.Cells(2, 11).Value
+ GreatPerDecrease = ws.Cells(2, 11).Value
+ GreatTotVolume = ws.Cells(2, 12).Value
+
+
+For i = 2 To LastRowI
+
+  If ws.Cells(i + 1, 11).Value > GreatPerIncrease Then
+    GreatPerIncrease = ws.Cells(i, 11).Value
+    ws.Cells(2, 16).Value = ws.Cells(i, 9).Value
+  Else
+    GreatPerIncrease = GreatPerIncrease
+  End If
+
+  If ws.Cells(i + 1, 11).Value < GreatPerDecrease Then
+    GreatPerDecrease = ws.Cells(i, 11).Value
+    ws.Cells(3, 16).Value = ws.Cells(i, 9).Value
+  Else
+    GreatPerDecrease = GreatPerDecrease
+  End If
+
+  If ws.Cells(i + 1, 12).Value > GreatTotVolume Then
+     GreatTotVolume = ws.Cells(i, 12).Value
+    ws.Cells(4, 16).Value = ws.Cells(i, 9).Value
+  Else
+     GreatTotVolume = GreatTotVolume
+  End If
+  
+  'Format Summary Results'
+   ws.Cells(2, 17).Value = Format(GreatPerIncrease, "Percent")
+   ws.Cells(3, 17).Value = Format(GreatPerDecrease, "Percent")
+   ws.Cells(4, 17).Value = Format(GreatTotVolume, "Scientific")
+  
+Next i
+
+Worksheets(WorksheetName).Columns("A:Z").AutoFit
+
+Next ws
+
+End Sub
+
